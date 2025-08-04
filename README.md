@@ -10,6 +10,10 @@ Deutsches Elektronen-Synchrotron (DESY)
 
 ## Installation
 
+(Pre-built Windows executable (.exe) file is available in the Releases section of this repository for easy use without Python installation.=
+
+
+
 Clone the repository:
 ```
    git clone https://github.com/your-username/your-repo.git
@@ -60,13 +64,8 @@ Run the GUI application:
 
 
 
-Download Executable
 
-Pre-built Windows executable (.exe) file is available in the Releases section of this repository for easy use without Python installation.
-
-
-
-    
+  
 
 ## License
 
