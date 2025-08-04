@@ -2,7 +2,7 @@
 GUI tool to calculate and visualize stage angle and angles between electron/ion beams and a Autoloader grid/Autogrid.
 
 Created by **Tim Laugks**  
-CSSB Advanced Light and Fluorescence Microscopy (ALFM) Facility  
+CSSB / ALFM Facility  
 Deutsches Elektronen-Synchrotron (DESY)  
 **Version:** 31.07.2025
 
