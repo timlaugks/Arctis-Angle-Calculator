@@ -92,9 +92,9 @@ def display_results(stage, ebeam, ibeam, iflm):
 
 def insert_image(angle, rotation):
     try:
-        imagebig = Image.open(resource_path("autogridquerschnitt_gross.png")).rotate(angle, resample=Image.BICUBIC)
-        imagesmall = Image.open(resource_path("geometry_caption.png"))
-        mask_im = Image.open(resource_path("geometry.png"))
+        imagebig = Image.open(resource_path("images/autogridquerschnitt_gross.png")).rotate(angle, resample=Image.BICUBIC)
+        imagesmall = Image.open(resource_path("images/geometry_caption.png"))
+        mask_im = Image.open(resource_path("images/geometry.png"))
         imagebig.paste(imagesmall, mask_im)
         tkimage = ImageTk.PhotoImage(imagebig)
         img_label = Label(image=tkimage)
@@ -211,7 +211,7 @@ insert_image(0, 0)
 
 # === Footer with logo and attribution ===
 try:
-    logo_img = Image.open(resource_path("cssb_logo.png"))
+    logo_img = Image.open(resource_path("images/cssb_logo.png"))
     logo_img = logo_img.resize((100, 34), Image.LANCZOS)
     logo_tk = ImageTk.PhotoImage(logo_img)
     logo_label = Label(master, image=logo_tk)
@@ -226,3 +226,4 @@ Label(master, text=footer_text, font=("Arial", 8), fg="gray")\
 
 # === Run GUI ===
 master.mainloop()
+
