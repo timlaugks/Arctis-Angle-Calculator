@@ -10,7 +10,7 @@ Deutsches Elektronen-Synchrotron (DESY)
 
 ## Installation
 
-(Pre-built Windows executable (.exe) file is available in the Releases section of this repository for easy use without Python installation.=
+(Pre-built Windows executable (.exe) file is available in the Releases section of this repository for easy use without Python installation.)
 
 
 
