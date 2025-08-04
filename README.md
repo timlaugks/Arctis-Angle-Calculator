@@ -11,11 +11,11 @@ Deutsches Elektronen-Synchrotron (DESY)
 ## Installation
 
 Clone the repository:
-
+```
    git clone https://github.com/your-username/your-repo.git
+   
    cd your-repo
-
-
+```
 
 Install dependencies:
 
@@ -37,7 +37,7 @@ Requirements
 
 Run the GUI application:
 
-arctisangle.py
+```arctisangle.py```
 
 Download Executable
 
@@ -61,7 +61,7 @@ Build the Executable Yourself (Optional)
 If you'd like to generate the .exe manually:
 
     Install PyInstaller:
-
+```
 pip install pyinstaller
 
 Run this command from the project folder:
@@ -72,5 +72,5 @@ pyinstaller --onefile ^
   --add-data "images/geometry.png;." ^
   --add-data "images/cssb_logo.png;." ^
   arctisangle.py
-
+```
 The .exe will appear in the dist/ folder.
