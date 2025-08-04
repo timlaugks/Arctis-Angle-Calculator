@@ -29,8 +29,27 @@ Requirements
     Pillow for image processing
 
     Tkinter (usually included with Python)
+    
 
+Build the Executable Yourself (Optional)
 
+If you'd like to generate the .exe manually:
+
+Install PyInstaller:
+```
+pip install pyinstaller
+```
+
+Run this command from the project folder:
+```
+pyinstaller --onefile ^
+  --add-data "images/autogridquerschnitt_gross.png;." ^
+  --add-data "images/geometry_caption.png;." ^
+  --add-data "images/geometry.png;." ^
+  --add-data "images/cssb_logo.png;." ^
+  arctisangle.py
+```
+The .exe will appear in the dist/ folder
 
 
 ## Usage
@@ -49,31 +68,6 @@ Pre-built Windows executable (.exe) file is available in the Releases section of
 
     
 
-License
+## License
 
 This project is licensed under the MIT License
-
-
-
-
-
-
-
-Build the Executable Yourself (Optional)
-
-If you'd like to generate the .exe manually:
-
-    Install PyInstaller:
-```
-pip install pyinstaller
-
-Run this command from the project folder:
-
-pyinstaller --onefile ^
-  --add-data "images/autogridquerschnitt_gross.png;." ^
-  --add-data "images/geometry_caption.png;." ^
-  --add-data "images/geometry.png;." ^
-  --add-data "images/cssb_logo.png;." ^
-  arctisangle.py
-```
-The .exe will appear in the dist/ folder.
