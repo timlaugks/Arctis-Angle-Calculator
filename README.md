@@ -10,36 +10,17 @@ Deutsches Elektronen-Synchrotron (DESY)
 
 ## Installation
 
-1. Clone the repository:
+Clone the repository:
 
    ```bash
    git clone https://github.com/your-username/your-repo.git
    cd your-repo
 
-    (Optional) Create a virtual environment:
 
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 Install dependencies:
 
     pip install -r requirements.txt
-
-
-
-
-Usage
-
-Run the GUI application:
-
-python main.py
-
-Replace main.py with the filename of your script if different.
-Download Executable
-
-Pre-built Windows executable (.exe) files are available in the Releases section of this repository for easy use without Python installation.
-
-
 
 
 Requirements
@@ -49,6 +30,19 @@ Requirements
     Pillow for image processing
 
     Tkinter (usually included with Python)
+
+
+
+
+## Usage
+
+Run the GUI application:
+
+arctisangle.py
+
+Download Executable
+
+Pre-built Windows executable (.exe) file is available in the Releases section of this repository for easy use without Python installation.
 
 
     
@@ -74,10 +68,10 @@ pip install pyinstaller
 Run this command from the project folder:
 
 pyinstaller --onefile ^
-  --add-data "autogridquerschnitt_gross.png;." ^
-  --add-data "geometry_caption.png;." ^
-  --add-data "geometry.png;." ^
-  --add-data "cssb_logo.png;." ^
-  main.py
+  --add-data "images/autogridquerschnitt_gross.png;." ^
+  --add-data "images/geometry_caption.png;." ^
+  --add-data "images/geometry.png;." ^
+  --add-data "images/cssb_logo.png;." ^
+  arctisangle.py
 
 The .exe will appear in the dist/ folder.
