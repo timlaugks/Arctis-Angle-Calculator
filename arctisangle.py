@@ -20,10 +20,10 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 # === Constants ===
-STAGE_RANGE = (-195, 9)
-EBEAM_RANGE = (-105, 99)
-IBEAM_RANGE = (-157, 47)
-IFLM_RANGE = (-105, 99)
+STAGE_RANGE = (-192.5, 15)
+EBEAM_RANGE = (-102.5, 105)
+IBEAM_RANGE = (-154.5, 53)
+IFLM_RANGE = (-105, 102.5)
 
 # === GUI Setup ===
 master = tk.Tk()
@@ -226,4 +226,5 @@ Label(master, text=footer_text, font=("Arial", 8), fg="gray")\
 
 # === Run GUI ===
 master.mainloop()
+
 
