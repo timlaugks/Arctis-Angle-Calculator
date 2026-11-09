@@ -5,7 +5,7 @@ GUI tool to calculate and visualize stage angle and angles between electron/ion 
 Created by **Tim Laugks**  
 CSSB Advanced Light and Fluorescence Microscopy (ALFM) Facility  
 Deutsches Elektronen-Synchrotron (DESY)  
-**Version:** 31.07.2025
+**Version:** 11.09.2026
 
 > Previous version (v1.0, 2D Matplotlib-based): available in the [v1.0 Release](https://github.com/timlaugks/Arctis-Angle-Calculator/releases/tag/v1.0)
 
