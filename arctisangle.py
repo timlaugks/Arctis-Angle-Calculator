@@ -1,6 +1,6 @@
 # Calculate and shows stage angle and angle between electron/ion beam and grid using a GUI
 # Author : Tim Laugks - 26.11.2020
-# Version: 09.11.2026  (3D view, redesigned GUI)
+# Version: V2.1 18.11.2026  (3D view, redesigned GUI)
 # CSSB Advanced Light and Fluorescence Microscopy (ALFM) Facility
 # Deutsches Elektronen-Synchrotron (DESY)
 #
@@ -30,7 +30,7 @@ COLORS = {"stage": "#4b5563", "ebeam": "#e4572e",
 
 BEAMS   = {"ebeam": 0, "ibeam": 52, "iflm": 180}
 PRESETS = [("iFLM", -180), ("Lamella Milling", -30),
-           ("Perpendicular Milling", -128), ("Home", 0)]
+           ("Perpendicular Milling", -128), ("Shadow Milling", -190), ("Home", 0)]
 VIEWS   = {"Iso": (20, -60), "Side": (0, -90), "Top": (90, -90)}
 
 MODEL_FILE     = "autogrid.stl"
@@ -41,17 +41,19 @@ MAX_FACES      = 8000
 GRID_RADIUS          = 1.0
 GRID_DIAMETER_MM     = 3.0
 BEAM_POINT_OFFSET_MM = 0.1
-BEAM_LENGTH          = 1.4
-LABEL_FACTOR         = 1.62   # Abstand der Beschriftung vom Ursprung
-LABEL_SCALE          = 0.15   # Schriftgroesse
+BEAM_LENGTH          = 1.2
+LABEL_FACTOR         = 1.2   # Abstand der Beschriftung vom Ursprung
+LABEL_SCALE          = 0.05   # Schriftgroesse
 SHAFT_RADIUS         = 0.022
 HEAD_RADIUS          = 0.07
 HEAD_LENGTH          = 0.22
-BEAM_TIP_OFFSET      = 0.06   # Pfeilspitzen enden leicht versetzt vom Ursprung
+BEAM_TIP_OFFSET      = -0.1   # Pfeilspitzen enden leicht versetzt vom Ursprung
 
 UI_BG    = "#eef1f5"
 CARD_BG  = "#ffffff"
 PLOT_BG  = (240, 244, 248)
+
+CLIP_COLOR = "#e0e7ff"   # Hintergrundfarbe des aktiven Clip-Buttons
 
 RENDER_W = 580
 RENDER_H = 580
@@ -164,7 +166,7 @@ def load_model():
         try:
             mesh = mesh.simplify_quadric_decimation(face_count=MAX_FACES)
         except Exception:
-            print(f"Modell hat {len(mesh.faces)} Dreiecke, nicht vereinfacht.")
+            print # Vereinfachung nicht verfügbar, Modell wird unveraendert verwendet
 
     verts = np.asarray(mesh.vertices, dtype=float) @ _rot_matrix(*MODEL_ROTATION).T
     verts -= (verts.min(0) + verts.max(0)) / 2
@@ -181,6 +183,8 @@ class Scene3D:
         self._verts, self._faces = model
         offset = BEAM_POINT_OFFSET_MM * 2 * GRID_RADIUS / GRID_DIAMETER_MM
         self._verts = self._verts + np.array([0.0, 0.0, -offset])
+
+        self._clipping = False   # Halbschnitt ein/aus
 
         vedo.settings.immediate_rendering = False
         self.plt = Plotter(offscreen=True,
@@ -224,17 +228,57 @@ class Scene3D:
         cam = self.plt.renderer.GetActiveCamera()
         cam.SetPosition(x, y, z)
         cam.SetFocalPoint(0, 0, 0)
-        if abs(self._elev) > 85:
-            cam.SetViewUp(np.cos(np.radians(self._azim)),
-                          np.sin(np.radians(self._azim)), 0)
+        if abs(self._elev) > 70:
+            # Bei steiler Draufsicht/Untersicht: ViewUp zeigt in die Szene,
+            # orientiert an der aktuellen Azimut-Richtung – verhindert
+            # das spontane 180°-Kippen des Autogrids.
+            sign = 1.0 if self._elev > 0 else -1.0
+            cam.SetViewUp(-sign * np.cos(az), -sign * np.sin(az), 0.0)
         else:
             cam.SetViewUp(0, 0, 1)
         cam.SetViewAngle(25)
+        self._update_light()
+
+    def _update_light(self):
+        """Licht folgt der Kamera mit festem seitlichem Versatz –
+        verhindert frontale Überbelichtung bei Top/Bottom-Ansicht."""
+        renderer = self.plt.renderer
+
+        # Alle vorhandenen Lichter entfernen und durch ein eigenes ersetzen
+        renderer.RemoveAllLights()
+
+        el  = np.radians(self._elev + 35)   # Licht 35° über der Kamera
+        az  = np.radians(self._azim + 40)   # Licht 40° seitlich versetzt
+        d   = self._dist * 2.0
+        lx  = d * np.cos(el) * np.cos(az)
+        ly  = d * np.cos(el) * np.sin(az)
+        lz  = d * np.sin(el)
+
+        light = vtk.vtkLight()
+        light.SetPosition(lx, ly, lz)
+        light.SetFocalPoint(0, 0, 0)
+        light.SetIntensity(1.1)
+        light.SetLightTypeToSceneLight()
+        renderer.AddLight(light)
+
+        # Zweites, schwaches Fülllicht von der Gegenseite
+        fill = vtk.vtkLight()
+        fill.SetPosition(-lx * 0.5, -ly * 0.5, -lz * 0.5)
+        fill.SetFocalPoint(0, 0, 0)
+        fill.SetIntensity(0.5)
+        fill.SetLightTypeToSceneLight()
+        renderer.AddLight(fill)
+        
 
     def set_view(self, name):
         self._elev, self._azim = VIEWS[name]
         self._apply_camera()
         self._render()
+
+    def toggle_clip(self):
+        """Halbschnitt durch das Autogrid ein- oder ausschalten."""
+        self._clipping = not self._clipping
+        return self._clipping
 
     # ---------------------------------------------------------------- Maus
     def _mouse_press(self, event):
@@ -294,13 +338,21 @@ class Scene3D:
         verts_rot = (self._verts @ rot_y.T).astype(np.float32)
         grid_mesh = Mesh([verts_rot, self._faces])
         grid_mesh.color(MODEL_COLOR).lighting("glossy")
+        if self._clipping:
+            # Schnittebene: y = 0, Normale zeigt in +y → hintere Hälfte weg
+            clip_plane = vtk.vtkPlane()
+            clip_plane.SetOrigin(0.0, 0.0, 0.0)
+            clip_plane.SetNormal(0.0, 1.0, 0.0)
+            grid_mesh.actor.GetMapper().AddClippingPlane(clip_plane)
+            
         self.plt.renderer.AddActor(grid_mesh.actor)
 
-        # --- Kippachse ---
-        for sign in (-1, 1):
-            cyl = Cylinder(pos=[(0, sign*1.12, 0), (0, sign*1.55, 0)],
-                           r=0.014, c=COLORS["stage"])
-            self.plt.renderer.AddActor(cyl.actor)
+         # --- Kippachse (bei Halbschnitt ausgeblendet) ---
+        if not self._clipping:
+            for sign in (-1, 1):
+                cyl = Cylinder(pos=[(0, sign*1.12, 0), (0, sign*1.55, 0)],
+                               r=0.014, c=COLORS["stage"])
+                self.plt.renderer.AddActor(cyl.actor)
 
         # --- Beam-Pfeile ---
         # Alle Spitzen treffen sich nahe am gemeinsamen Punkt (BEAM_TIP_OFFSET
@@ -454,11 +506,17 @@ class App:
                        command=lambda n=name: self.scene.set_view(n)).grid(
                 row=1, column=i, sticky="ew", padx=2)
             card.columnconfigure(i, weight=1)
+
+        self._clip_btn = ttk.Button(card, text="⬛  Cross-section  OFF",
+                                    style="Preset.TButton",
+                                    command=self._toggle_clip)
+        self._clip_btn.grid(row=2, column=0, columnspan=4,
+                            sticky="ew", pady=(6, 0))
         ttk.Label(card,
                   text="Left-drag: rotate  ·  Scroll/Right-drag: zoom\n"
                        "Grey stubs = tilt axis of the stage",
-                  style="Hint.TLabel").grid(row=2, column=0, columnspan=4,
-                                            sticky="w", pady=(6, 0))
+                  style="Hint.TLabel").grid(row=3, column=0, columnspan=4,
+                                            sticky="w", pady=(4, 0))
 
         # --- Status + Footer
         self.status_label = ttk.Label(left, textvariable=self.status,
@@ -468,12 +526,12 @@ class App:
         footer = ttk.Frame(left)
         footer.grid(row=6, sticky="sw")
         try:
-            logo = Image.open("cssb_logo.png").resize((100, 34), Image.LANCZOS)
+            logo = Image.open("cssb_logo.png").resize((50, 50), Image.LANCZOS)
             self._logo = ImageTk.PhotoImage(logo)
             ttk.Label(footer, image=self._logo).grid(row=0, column=0, padx=(0, 10))
         except Exception:
             pass
-        ttk.Label(footer, text="Created by Tim Laugks · July 2025", style="Sub.TLabel",
+        ttk.Label(footer, text="Created by Tim Laugks · November 2026", style="Sub.TLabel",
                   font=(tkfont.nametofont("TkDefaultFont").actual("family"), 8)).grid(
             row=0, column=1)
 
@@ -486,6 +544,17 @@ class App:
         self.scene = Scene3D(frame, load_model())
 
     # ------------------------------------------------------------- Aktionen
+
+    def _toggle_clip(self):
+        active = self.scene.toggle_clip()
+        if active:
+            self._clip_btn.config(text="⬜  Cross-section  ON")
+        else:
+            self._clip_btn.config(text="⬛  Cross-section  OFF")
+        self.scene.update(self.stage, angles_from_stage(self.stage))
+
+
+
     def _on_slider(self, value):
         if self._busy:
             return
