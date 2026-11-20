@@ -10,7 +10,6 @@ Deutsches Elektronen-Synchrotron (DESY)
 > Previous version (v1.0, 2D Matplotlib-based): available in the [v1.0 Release](https://github.com/timlaugks/Arctis-Angle-Calculator/releases/tag/v1.0)
 
 ---
-## What's New in v2.1
 
 ## What's New in v2.1
 
