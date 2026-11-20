@@ -5,11 +5,21 @@ GUI tool to calculate and visualize stage angle and angles between electron/ion 
 Created by **Tim Laugks**  
 CSSB Advanced Light and Fluorescence Microscopy (ALFM) Facility  
 Deutsches Elektronen-Synchrotron (DESY)  
-**Version:** 11.09.2026
+**Version:** 20.11.09.2026
 
 > Previous version (v1.0, 2D Matplotlib-based): available in the [v1.0 Release](https://github.com/timlaugks/Arctis-Angle-Calculator/releases/tag/v1.0)
 
 ---
+## What's New in v2.1
+
+## What's New in v2.1
+
+- **Cross-section view**: new toggle button cuts the Autogrid in half along the tilt axis — ideal for inspecting the internal geometry in Side view. The tilt axis stubs are automatically hidden when cross-section is active
+- **Fixed Top/Bottom view flipping**: the Autogrid no longer spontaneously rotates 180° when switching to Top view or rotating to a steep angle
+- **Improved lighting**: the light source now follows the camera with a fixed offset, preventing overexposure in Top and Bottom views
+
+
+
 
 ## What's New in v2.0
 
